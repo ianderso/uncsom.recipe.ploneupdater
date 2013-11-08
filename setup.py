@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
-This module contains the tool of collective.recipe.updateplone
-"""
+""" This module contains the tool of uncsom.recipe.ploneupdater """
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
+from setuptools import find_packages
+
 
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
-version = '0.3'
+version = '0.1'
 
 long_description = (
     read('README.md')
@@ -16,7 +16,7 @@ long_description = (
     'Detailed Documentation\n'
     '**********************\n'
     + '\n' +
-    read('collective', 'recipe', 'updateplone', 'README.txt')
+    read('uncsom', 'recipe', 'ploneupdater', 'README.txt')
     + '\n' +
     'Contributors\n'
     '************\n'
@@ -28,41 +28,37 @@ long_description = (
     + '\n' +
     read('CHANGES.txt')
     + '\n' +
-   'Download\n'
+    'Download\n'
     '********\n'
     )
-entry_point = 'collective.recipe.updateplone:Recipe'
+entry_point = 'uncsom.recipe.ploneupdater:Recipe'
 entry_points = {"zc.buildout": ["default = %s" % entry_point]}
 
-tests_require=['zope.testing', 'zc.buildout']
+tests_require = ['zope.testing', 'zc.buildout']
 
-setup(name='collective.recipe.updateplone',
+setup(name='uncsom.recipe.ploneupdater',
       version=version,
       description="A buildout recipe to update plone sites",
       long_description=long_description,
-      # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
-        'Framework :: Buildout',
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: OSI Approved :: Zope Public License',
-        ],
+          "Environment :: Web Environment",
+          "Framework :: Plone",
+          "Operating System :: OS Independent",
+          "Programming Language :: Python",
+          "Programming Language :: Python :: 2.7",
+          "Topic :: Software Development :: Libraries :: Python Modules", ],
       keywords='buildout recipe update plone',
-      author='Mustapha Benali, Anton Stonor',
-      author_email='mustapha@headnet.dk',
-      url='http://dev.plone.org/collective/browser/buildout/collective.recipe.updateplone',
-      license='ZPL',
+      author='Ian Anderson',
+      author_email='ianderso@med.unc.edu',
+      url='https://github.com/ianderso/uncsom.recipe.ploneupdater',
+      license='GPL',
       packages=find_packages(exclude=['ez_setup']),
-      namespace_packages=['collective', 'collective.recipe'],
+      namespace_packages=['uncsom', 'uncsom.recipe'],
       include_package_data=True,
       zip_safe=False,
-      install_requires=['setuptools',
-                        'zc.buildout'
-                        # -*- Extra requirements: -*-
-                        ],
+      install_requires=['setuptools', 'zc.buildout'],
       tests_require=tests_require,
       extras_require=dict(tests=tests_require),
-      test_suite = 'collective.recipe.updateplone.tests.test_docs.test_suite',
+      test_suite='uncsom.recipe.ploneupdater.tests.test_docs.test_suite',
       entry_points=entry_points,
       )

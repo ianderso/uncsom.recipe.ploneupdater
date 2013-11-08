@@ -20,7 +20,11 @@ use the -c option to specify an alternate configuration file.
 $Id$
 """
 
-import os, shutil, sys, tempfile, urllib2
+import os
+import shutil
+import sys
+import tempfile
+import urllib2
 
 tmpeggs = tempfile.mkdtemp()
 
@@ -33,7 +37,7 @@ import pkg_resources
 
 cmd = 'from setuptools.command.easy_install import main; main()'
 if sys.platform == 'win32':
-    cmd = '"%s"' % cmd # work around spawn lamosity on windows
+    cmd = '"%s"' % cmd  # work around spawn lamosity on windows
 
 ws = pkg_resources.working_set
 assert os.spawnle(

@@ -6,24 +6,27 @@ from Acquisition import aq_base
 from AccessControl.SecurityManagement import newSecurityManager
 
 _marker = object()
+
+
 def shasattr(obj, attr):
     return getattr(aq_base(obj), attr, _marker) is not _marker
+
 
 class PloneUpdater(object):
     """Plone sites updater
     """
-    
-    def __init__(self, 
-                 app,             #The application instance
-                 admin_name,      #The zope instance admin name
-                 plone_sites,     #A list of plone site ids 
-                 migrate_plone,   #Do we have to run portal_migration.upgrade 
-                 p2install=[],    #A list of products to install
-                 p2uninstall=[],  #A list of products to uninstall
-                 scripts2run=[],  #A list of paths for scripts to run
-                 profiles2run=[], #A list of GS profile ids to run
-                 pack_db=True,    #If we have to pack the database
-                ): 
+
+    def __init__(self,
+                 app,  # The application instance
+                 admin_name,  # The zope instance admin name
+                 plone_sites,  # A list of plone site ids
+                 migrate_plone,  # Do we have to run portal_migration.upgrade
+                 p2install=[],  # A list of products to install
+                 p2uninstall=[],  # A list of products to uninstall
+                 scripts2run=[],  # A list of paths for scripts to run
+                 profiles2run=[],  # A list of GS profile ids to run
+                 pack_db=True,  # If we have to pack the database
+                 ):
         self.app = app
         self.admin_name = admin_name
         self.plone_sites = plone_sites
@@ -33,12 +36,11 @@ class PloneUpdater(object):
         self.scripts2run = scripts2run
         self.profiles2run = profiles2run
         self.pack_db = pack_db
-        
+
         self.invalid_plone_sites = []
-        
+
     def log(self, msg):
         print >> sys.stdout, "*** collective.recipe.updateplone:", msg
-
 
     def authenticate(self):
         """wrap the request in admin security context
@@ -47,7 +49,6 @@ class PloneUpdater(object):
         admin = admin.__of__(self.app.acl_users)
         newSecurityManager(None, admin)
         self.app = makerequest.makerequest(self.app)
-    
 
     def add_sites(self):
         """try to create the plone sites if they are not already created.
@@ -56,15 +57,16 @@ class PloneUpdater(object):
             site = getattr(self.app, site_name, None)
             if site is not None:
                 if site.Type() == 'Plone Site':
-                    self.log("Skipped: Plone site already exists: " + site_name)
+                    self.log("Skipped: Plone site already exists: " +
+                             site_name)
                 else:
-                    self.log("Cannot create plone site. An object with same id already exists: " + site_name)
+                    self.log("Cannot create plone site. An object with same \
+                              id already exists: " + site_name)
                     self.invalid_plone_sites.append(site_name)
             else:
                 self.log("Adding plone site: " + site_name)
                 self.app.manage_addProduct['CMFPlone'].addPloneSite(site_name)
                 self.log("Added plone site: " + site_name)
-
 
     def pack_database(self):
         if self.pack_db:
@@ -74,22 +76,20 @@ class PloneUpdater(object):
         else:
             self.log("Pack Database skipped...")
 
-
     def upgrade_plone(self, site):
-        """run portal_migration.upgrade 
+        """run portal_migration.upgrade
         """
         if not self.migrate_plone:
-            return 
+            return
         portal = self.app[site]
         portal.REQUEST.set('REQUEST_METHOD', 'POST')
         portal.portal_migration.upgrade()
 
-
     def install_products(self, site):
         qi = self.app[site].portal_quickinstaller
         p2reinstall = [p for p in self.p2install if qi.isProductInstalled(p)]
-        p2install = [p for p in self.p2install 
-                       if qi.isProductAvailable(p) and p not in p2reinstall]
+        p2install = [p for p in self.p2install
+                     if qi.isProductAvailable(p) and p not in p2reinstall]
         _changed = False
         if p2install:
             self.log(site + "->Installing: " + str(p2install))
@@ -104,7 +104,6 @@ class PloneUpdater(object):
         if not _changed:
             self.log(site + "->Nothing to install or to reinstall")
 
-
     def uninstall_products(self, site):
         qi = self.app[site].portal_quickinstaller
         p2uninstall = [p for p in self.p2uninstall if qi.isProductInstalled(p)]
@@ -115,24 +114,23 @@ class PloneUpdater(object):
         else:
             self.log(site + "->Nothing to uninstall")
 
-
     #TODO: rewrite this method to make possible passing arguments to the script
     def run_scripts(self, site):
         portal = getattr(self.app, site)
         for script in self.scripts2run:
             if script.startswith('portal/'):
-                #play safe  
+                #play safe
                 script = '/' + site + script[6:]
 
             self.log(site + "->Running script " + script)
             try:
                 portal.restrictedTraverse(script)
                 self.log(site + "->Ran script " + script)
-            except Exception, e: 
-                self.log(site + "->Exception accured wile running script: " + script)
+            except Exception, e:
+                self.log(site + "->Exception accured wile running script: "
+                         + script)
                 self.log(site + "-> " + str(e))
-                continue                    
-
+                continue
 
     def run_profiles(self, site):
         portal = getattr(self.app, site)
@@ -149,13 +147,13 @@ class PloneUpdater(object):
                     setup_tool.runAllImportSteps()
                 self.log(site + "->Ran profile " + profile_id)
             except Exception, e:
-                self.log(site + "->Exception while importing profile: " + profile_id)
+                self.log(site + "->Exception while importing profile: "
+                         + profile_id)
                 self.log(site + "-> " + str(e))
 
     #TODO: add a buildout option upgrade-profile to run profile migration steps
     def upgrade_profiles(self, site):
-	    pass
-
+        pass
 
     def __call__(self):
         self.authenticate()
@@ -171,4 +169,3 @@ class PloneUpdater(object):
                 self.upgrade_profiles(site_name)
 
         transaction.commit()
-

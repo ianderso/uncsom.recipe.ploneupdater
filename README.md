@@ -1,6 +1,5 @@
 uncsom.recipe.ploneupdater
 ==========================
-.. contents::
 
 - Code repository: https://github.com/ianderso/uncsom.recipe.ploneupdater
 

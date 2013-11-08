@@ -3,15 +3,15 @@ import sys
 recipe_egg_path = '%(recipe_egg_path)s'
 
 sys.path.append(recipe_egg_path)
-from collective.recipe.updateplone.ploneupdater import PloneUpdater
+from uncsom.recipe.ploneupdater.ploneupdater import PloneUpdater
 
-updater = PloneUpdater(app = app, 
-                       admin_name = '%(admin_name)s', 
-                       plone_sites = %(sites)s, 
-                       migrate_plone = %(migrate_plone)s, 
+updater = PloneUpdater(app = app,
+                       admin_name = '%(admin_name)s',
+                       plone_sites = %(sites)s,
+                       migrate_plone = %(migrate_plone)s,
                        p2install = %(install)s,
-                       p2uninstall = %(uninstall)s, 
-                       scripts2run = %(scripts)s, 
-                       profiles2run = %(profiles)s, 
+                       p2uninstall = %(uninstall)s,
+                       scripts2run = %(scripts)s,
+                       profiles2run = %(profiles)s,
                        pack_db = %(pack_db)s)
 updater()

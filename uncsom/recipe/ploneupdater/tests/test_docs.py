@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Doctest runner for 'collective.recipe.updateplone'.
+Doctest runner for 'uncsom.recipe.ploneupdater'.
 """
 __docformat__ = 'restructuredtext'
 
@@ -19,7 +19,7 @@ def setUp(test):
     zc.buildout.testing.buildoutSetUp(test)
 
     # Install the recipe in develop mode
-    zc.buildout.testing.install_develop('collective.recipe.updateplone', test)
+    zc.buildout.testing.install_develop('uncsom.recipe.ploneupdater', test)
 
 
 def test_suite():

@@ -4,6 +4,7 @@ import transaction
 from Testing import makerequest
 from Acquisition import aq_base
 from AccessControl.SecurityManagement import newSecurityManager
+from Products.CMFPlone.Portal import PloneSite
 
 _marker = object()
 
@@ -46,7 +47,18 @@ class PloneUpdater(object):
         self.log("Finished Plone Upgrade")
         transaction.commit()
 
-   def reinstall_outdated_products(self, site):
+    def upgrade_products(self, site):
+        qi = self.app[site].portal_quickinstaller
+        update = [p['id'] for p in qi.listInstalledProducts() if
+                  p['installedVersion'] != qi.getProductVersion(p['id'])]
+        for product in update:
+            info = qi.upgradeInfo(product)
+            if info['available']:
+                self.upgrade_profile(product)
+            else:
+                self.reinstall_product(product)
+
+    def reinstall_product(self, site):
         qi = self.app[site].portal_quickinstaller
         update = [p for p in qi.listInstalledProducts() if
                   p['installedVersion'] != qi.getProductVersion(p['id'])]
@@ -91,11 +103,22 @@ class PloneUpdater(object):
                          + profile_id)
                 self.log(site + "-> " + str(e))
 
-    def upgrade_profiles(self, site):
-        pass
+    def upgrade_profile(self, site):
+        qi = self.app[site].portal_quickinstaller
+        update = [p for p in qi.listInstalledProducts() if
+                  p['installedVersion'] != qi.getProductVersion(p['id'])]
+        self.log(site + "->Upgrading: " + str(update))
+        for product in update:
+            qi.upgradeProduct(product)
+        self.log(site + "->Upgraded: " + str(update))
+        transaction.commit()
 
     def get_plone_sites(self, app):
-        pass
+        sites = []
+        for obj in app.objectValues():
+            if type(obj.aq_base) is PloneSite:
+                sites.append(obj.id)
+        return sites
 
     def __call__(self):
         self.authenticate()
@@ -103,7 +126,6 @@ class PloneUpdater(object):
         plone_sites = self.get_plone_sites()
         for site in plone_sites:
             self.upgrade_plone(site)
-            self.upgrade_profiles(site_name)
-            self.reinstall_outdated_products(site)
+            self.upgrade_products(site)
             self.run_scripts(site)
         transaction.commit()

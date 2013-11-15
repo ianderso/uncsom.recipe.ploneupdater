@@ -1,12 +1,7 @@
 Supported options
 =================
 
-The recipe supports the following options:
-
-run-script
-    A list of scripts to call/run. Each item of the list consist of a path to
-    the script to run. The path has to start with ``portal/``.
-    ex: portal/migrate_all
+The recipe supports the following option:
 
 admin-name
     The name of the zope instance admin. The same as defined in the ``user``
@@ -23,7 +18,7 @@ install RichDocument and NuPlone into these sites::
     >>> write(sample_buildout, 'buildout.cfg', """
     ... [buildout]
     ... parts =
-    ...     instance1
+    ...     instance
     ...     update-plone
     ... index = http://pypi.python.org/simple
     ... find-links =
@@ -33,7 +28,7 @@ install RichDocument and NuPlone into these sites::
     ...     Plone
     ...     Pillow
     ...
-    ... [instance1]
+    ... [instance]
     ... recipe = plone.recipe.zope2instance
     ... user = admin:admin
     ... eggs = ${buildout:eggs}

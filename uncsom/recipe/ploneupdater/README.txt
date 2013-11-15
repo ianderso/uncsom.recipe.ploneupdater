@@ -11,9 +11,8 @@ admin-name
 Example usage
 =============
 
-We'll start by creating a buildout that uses the recipe. Let's create
-a freash zope instance and create 2 plone sites inside it. We will also
-install RichDocument and NuPlone into these sites::
+We'll start by creating a buildout that uses the recipe. Let's create a freash
+zope instance::
 
     >>> write(sample_buildout, 'buildout.cfg', """
     ... [buildout]
@@ -35,4 +34,5 @@ install RichDocument and NuPlone into these sites::
     ...
     ... [update-plone]
     ... recipe = collective.recipe.updateplone
+    ... admin-name = admin
     ... """)

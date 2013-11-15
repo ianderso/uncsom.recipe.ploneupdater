@@ -2,25 +2,18 @@ import sys
 import transaction
 
 from Testing import makerequest
-from Acquisition import aq_base
 from AccessControl.SecurityManagement import newSecurityManager
 from Products.CMFPlone.Portal import PloneSite
-
-_marker = object()
-
-
-def shasattr(obj, attr):
-    return getattr(aq_base(obj), attr, _marker) is not _marker
+from zope.component.hooks import setSite
 
 
 class PloneUpdater(object):
     """Plone sites updater
     """
 
-    def __init__(self, admin_name, scripts2run=[]):
+    def __init__(self, admin_name, app):
         self.admin_name = admin_name
-        self.scripts2run = scripts2run
-        self.invalid_plone_sites = []
+        self.app = app
 
     def log(self, msg):
         print >> sys.stdout, "*** uncsom.recipe.ploneupdater:", msg
@@ -40,92 +33,63 @@ class PloneUpdater(object):
         transaction.commit()
 
     def upgrade_plone(self, site):
-        self.log("Beginning Plone Upgrade")
+        self.log("Beginning Plone Upgrade for site: " + site)
         portal = self.app[site]
         portal.REQUEST.set('REQUEST_METHOD', 'POST')
         portal.portal_migration.upgrade()
-        self.log("Finished Plone Upgrade")
+        self.log("Finished Plone Upgrade for site: " + site)
         transaction.commit()
 
     def upgrade_products(self, site):
         qi = self.app[site].portal_quickinstaller
-        update = [p['id'] for p in qi.listInstalledProducts() if
-                  p['installedVersion'] != qi.getProductVersion(p['id'])]
-        for product in update:
-            info = qi.upgradeInfo(product)
-            if info['available']:
-                self.upgrade_profile(product)
-            else:
-                self.reinstall_product(product)
-
-    def reinstall_product(self, site):
-        qi = self.app[site].portal_quickinstaller
-        update = [p for p in qi.listInstalledProducts() if
-                  p['installedVersion'] != qi.getProductVersion(p['id'])]
-        self.log(site + "->Reinstalling: " + str(update))
-        qi.reinstallProducts(update)
-        self.log(site + "->Reinstalled: " + str(update))
-        transaction.commit()
-
-    def run_scripts(self, site):
-        portal = getattr(self.app, site)
-        for script in self.scripts2run:
-            if script.startswith('portal/'):
-                #play safe
-                script = '/' + site + script[6:]
-
-            self.log(site + "->Running script " + script)
-            try:
-                portal.restrictedTraverse(script)
-                self.log(site + "->Ran script " + script)
-            except Exception, e:
-                self.log(site + "->Exception accured wile running script: "
-                         + script)
-                self.log(site + "-> " + str(e))
-                continue
-
-    def run_profiles(self, site):
-        portal = getattr(self.app, site)
-        setup_tool = getattr(portal, 'portal_setup')
-        for profile_id in self.profiles2run:
-            self.log(site + "->Running profile " + profile_id)
-            try:
-                if shasattr(setup_tool, 'runAllImportStepsFromProfile'):
-                    if not profile_id.startswith('profile-'):
-                        profile_id = "profile-%s" % profile_id
-                    setup_tool.runAllImportStepsFromProfile(profile_id)
+        products = [p for p in qi.listInstalledProducts()]
+        for product in products:
+            product_id = product['id']
+            info = qi.upgradeInfo(product_id)
+            if product['installedVersion'] != qi.getProductVersion(product_id):
+                if info['available']:
+                    self.upgrade_profile(site, product_id)
                 else:
-                    setup_tool.setImportContext(profile_id)
-                    setup_tool.runAllImportSteps()
-                self.log(site + "->Ran profile " + profile_id)
-            except Exception, e:
-                self.log(site + "->Exception while importing profile: "
-                         + profile_id)
-                self.log(site + "-> " + str(e))
+                    self.reinstall_product(site, product_id)
 
-    def upgrade_profile(self, site):
+    def reinstall_product(self, site, product):
+        setSite(self.app[site])
         qi = self.app[site].portal_quickinstaller
-        update = [p for p in qi.listInstalledProducts() if
-                  p['installedVersion'] != qi.getProductVersion(p['id'])]
-        self.log(site + "->Upgrading: " + str(update))
-        for product in update:
-            qi.upgradeProduct(product)
-        self.log(site + "->Upgraded: " + str(update))
+        self.log(site + " Reinstalling: " + str(product))
+        qi.reinstallProducts([product])
+        self.log(site + " Reinstalled: " + str(product))
         transaction.commit()
 
-    def get_plone_sites(self, app):
+    def upgrade_profile(self, site, product):
+        setSite(self.app[site])
+        qi = self.app[site].portal_quickinstaller
+        self.log(site + " Upgrading: " + str(product))
+        qi.upgradeProduct(product)
+        self.log(site + " Upgraded: " + str(product))
+        transaction.commit()
+
+    def get_plone_sites(self):
         sites = []
-        for obj in app.objectValues():
+        for obj in self.app.objectValues():
             if type(obj.aq_base) is PloneSite:
+                self.log("Found Plone Site: " + obj.id)
                 sites.append(obj.id)
         return sites
+
+    def remove_invalid_imports(self, site):
+        ps = self.app[site].portal_setup
+        reg = ps.getImportStepRegistry()
+        steps = reg.listStepMetadata()
+        invalid_steps = [step['id'] for step in steps if step['invalid']]
+        ps.manage_deleteImportSteps(invalid_steps)
+        transaction.commit()
 
     def __call__(self):
         self.authenticate()
         self.pack_database()
         plone_sites = self.get_plone_sites()
         for site in plone_sites:
+            self.remove_invalid_imports(site)
             self.upgrade_plone(site)
             self.upgrade_products(site)
-            self.run_scripts(site)
         transaction.commit()

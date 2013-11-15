@@ -2,9 +2,9 @@ import sys
 
 recipe_egg_path = '%(recipe_egg_path)s'
 
-sys.path.append(recipe_egg_path)
+sys.path[0:0] = ['/Users/ianderso/ploneupdatertest/src']
+#sys.path.append(recipe_egg_path)
 from uncsom.recipe.ploneupdater.ploneupdater import PloneUpdater
 
-updater = PloneUpdater(admin_name='%(admin_name)s',
-                       scripts2run=%(scripts)s)
+updater = PloneUpdater(admin_name='%(admin_name)s')
 updater()

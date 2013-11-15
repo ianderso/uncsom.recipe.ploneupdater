@@ -5,7 +5,7 @@ from Testing import makerequest
 from AccessControl.SecurityManagement import newSecurityManager
 from Products.CMFPlone.Portal import PloneSite
 from zope.component.hooks import setSite
-
+from optparse import OptionParser
 
 class PloneUpdater(object):
     """Plone sites updater
@@ -93,3 +93,14 @@ class PloneUpdater(object):
             self.upgrade_plone(site)
             self.upgrade_products(site)
         transaction.commit()
+
+if __name__ == '__main__' and "app" in locals():
+    parser = OptionParser()
+    parser.add_option("-u", "--admin-user",
+                      dest="admin_user", default="admin")
+    parser.add_option("-c", dest="path", default="")
+
+    (options, args) = parser.parse_args()
+
+    Updater = PloneUpdater(options.admin_user, app)
+    Updater()

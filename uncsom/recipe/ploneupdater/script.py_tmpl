@@ -1,9 +1,4 @@
-import sys
+import subprocess
 
-recipe_egg_path = '%(recipe_egg_path)s'
-
-sys.path.append(recipe_egg_path)
-from uncsom.recipe.ploneupdater.ploneupdater import PloneUpdater
-
-updater = PloneUpdater(admin_name='%(admin_name)s')
-updater()
+cmd = "%(bin-directory)s/%(instance-script)s run %(script)s %(args)s"
+subprocess.call(cmd.split())

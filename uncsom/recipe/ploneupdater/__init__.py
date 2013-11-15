@@ -13,8 +13,15 @@ class Recipe(object):
         template_file = os.path.join(os.path.dirname(__file__),
                                      'script.py_tmpl').replace("\\", "/")
         template = open(template_file, 'r').read()
-        template = template % dict(admin_name=self.options['admin-name'],
-                                   recipe_egg_path=recipe_egg_path)
+
+        options = {}
+        options['script'] = \
+            '%s/uncsom/recipe/ploneupdater/ploneupdater.py' % recipe_egg_path
+        options['bin-directory'] = self.bin_dir
+        options['instance-script'] = 'instance'
+        options['args'] = "--admin-user=%s" % self.options['admin-name']
+
+        template = template % options
 
         open(self.bin_dir + '/ploneUpdater', 'w+').write(template)
         return tuple()

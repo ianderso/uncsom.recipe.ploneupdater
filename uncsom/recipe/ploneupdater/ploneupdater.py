@@ -7,6 +7,7 @@ from Products.CMFPlone.Portal import PloneSite
 from zope.component.hooks import setSite
 from optparse import OptionParser
 
+
 class PloneUpdater(object):
     """Plone sites updater
     """
@@ -16,7 +17,7 @@ class PloneUpdater(object):
         self.app = app
 
     def log(self, msg):
-        print >> sys.stdout, "*** uncsom.recipe.ploneupdater:", msg
+        print >> sys.stdout, "uncsom.recipe.ploneupdater ", msg
 
     def authenticate(self):
         """wrap the request in admin security context
@@ -69,12 +70,8 @@ class PloneUpdater(object):
         transaction.commit()
 
     def get_plone_sites(self):
-        sites = []
-        for obj in self.app.objectValues():
-            if type(obj.aq_base) is PloneSite:
-                self.log("Found Plone Site: " + obj.id)
-                sites.append(obj.id)
-        return sites
+        return [obj.id for obj in self.app.objectValues()
+                if type(obj.aq_base) is PloneSite]
 
     def remove_invalid_imports(self, site):
         ps = self.app[site].portal_setup

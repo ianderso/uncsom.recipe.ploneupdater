@@ -3,7 +3,7 @@ Supported options
 
 The recipe supports the following option:
 
-admin-name
+admin-user
     The name of the zope instance admin. The same as defined in the ``user``
     option of your zope instance. Defaults to 'admin'
 
@@ -34,5 +34,5 @@ zope instance::
     ...
     ... [update-plone]
     ... recipe = collective.recipe.updateplone
-    ... admin-name = admin
+    ... admin-user = admin
     ... """)

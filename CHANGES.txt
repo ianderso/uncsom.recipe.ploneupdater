@@ -10,3 +10,8 @@
   - Detect zeo or standalone instance
   - Start and stop zeo
   - Stop instance if started
+
+1.2.1 (2013-11-16)
+================
+
+  - Correct options in README

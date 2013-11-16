@@ -1,4 +1,0 @@
-import subprocess
-
-cmd = "%(bin-directory)s/%(instance-script)s run %(script)s %(args)s"
-subprocess.call(cmd.split())

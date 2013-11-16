@@ -12,6 +12,9 @@ import subprocess
 
 %(zeo-start)s
 
+cmd = "%(instance-script)s stop"
+subprocess.call(cmd.split())
+
 cmd = "%(instance-script)s run %(script)s %(args)s"
 subprocess.call(cmd.split())
 

@@ -35,10 +35,10 @@ subprocess.call(cmd.split())
 %(zeo-stop)s
 """
 
-zeo_start_template = """zeo_start = "%s start" % zeo_cmd
+zeo_start_template = """zeo_start = "%(zeo-script)s start"
 subprocess.call(zeo_start.split())"""
 
-zeo_stop_template = """zeo_stop = "%s stop" % zeo_cmd
+zeo_stop_template = """zeo_stop = "%(zeo-script)s stop"
 subprocess.call(zeo_stop.split())"""
 
 

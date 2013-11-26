@@ -9,13 +9,27 @@ from sys import platform
 
 template = """#!%(executable)s
 import subprocess
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("-u", "--admin-user",
+                  dest="admin_user", default="%(admin-user)s")
+parser.add_option("-p", "--profile",
+                  dest="profile", default='')
+
+(options, args) = parser.parse_args()
+
+args = "--admin-user " + options.admin_user
+
+if options.profile != '':
+    args += " --profile " + options.profile
 
 %(zeo-start)s
 
 cmd = "%(instance-script)s stop"
 subprocess.call(cmd.split())
 
-cmd = "%(instance-script)s run %(script)s %(args)s"
+cmd = "%(instance-script)s run %(script)s " + args
 subprocess.call(cmd.split())
 
 %(zeo-stop)s
@@ -84,8 +98,6 @@ class Recipe(object):
             self.options['zeo-start'] = zeo_start_template % self.options
             self.options['zeo-stop'] = zeo_stop_template % self.options
 
-        self.options['args'] = self.createArgs()
-
     def install(self):
         script_path = pathjoin(self.options['bin-directory'], self.name)
         open(script_path, 'w+').write(template % self.options)
@@ -96,11 +108,3 @@ class Recipe(object):
 
     def update(self):
         self.install()
-
-    def createArgs(self):
-        """Helper method to create an argument list
-        """
-        args = []
-        args.append("--admin-user=%s" % self.options['admin-user'])
-
-        return " ".join(args)

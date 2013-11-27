@@ -27,8 +27,9 @@ fake-eggs/
 parts/
 dist/
 var/
-
-
+.Python
+include/
+lib/
 
 # OSX
 .DS_Store

@@ -8,7 +8,7 @@ from setuptools import find_packages
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
-version = '1.3.7'
+version = '1.3.8'
 
 long_description = (
     read('README.md')

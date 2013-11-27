@@ -5,7 +5,7 @@ from Testing import makerequest
 from AccessControl.SecurityManagement import newSecurityManager
 from Products.CMFPlone.Portal import PloneSite
 from zope.component.hooks import setSite
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 
 class PloneUpdater(object):
@@ -13,8 +13,10 @@ class PloneUpdater(object):
     """
 
     def __init__(self, options, app):
-        self.admin_user = options.admin_user
+        self.admin_user = options.user
         self.profile = options.profile
+        self.update = options.update
+        self.pack = options.pack
         self.app = app
 
     def log(self, site, msg):
@@ -29,17 +31,15 @@ class PloneUpdater(object):
         self.app = makerequest.makerequest(self.app)
 
     def pack_database(self):
-        self.log('', "Starting to pack Database")
+        self.log('', "Packing Database")
         self.app.Control_Panel.Database.manage_pack()
-        self.log('', "Database packed")
         transaction.commit()
 
     def upgrade_plone(self, site):
-        self.log(site, "Beginning Plone Upgrade")
+        self.log(site, "Upgrading Plone")
         portal = self.app[site]
         portal.REQUEST.set('REQUEST_METHOD', 'POST')
         portal.portal_migration.upgrade()
-        self.log(site, "Finished Plone Upgrade")
         transaction.commit()
 
     def upgrade_products(self, site):
@@ -59,7 +59,6 @@ class PloneUpdater(object):
         qi = self.app[site].portal_quickinstaller
         self.log(site, "Reinstalling: " + str(product))
         qi.reinstallProducts([product])
-        self.log(site, "Reinstalled: " + str(product))
         transaction.commit()
 
     def upgrade_profile(self, site, product):
@@ -67,7 +66,6 @@ class PloneUpdater(object):
         qi = self.app[site].portal_quickinstaller
         self.log(site, "Upgrading: " + str(product))
         qi.upgradeProduct(product)
-        self.log(site, "Upgraded: " + str(product))
         transaction.commit()
 
     def get_plone_sites(self):
@@ -75,6 +73,7 @@ class PloneUpdater(object):
                 if type(obj.aq_base) is PloneSite]
 
     def remove_invalid_imports(self, site):
+        self.log(site, "Removing Invalid Imports")
         ps = self.app[site].portal_setup
         reg = ps.getImportStepRegistry()
         steps = reg.listStepMetadata()
@@ -89,31 +88,35 @@ class PloneUpdater(object):
         if not self.profile.startswith('profile-'):
             self.profile = "profile-%s" % self.profile
         ps.runAllImportStepsFromProfile(self.profile)
-        self.log(site, "Ran profile " + self.profile)
         transaction.commit()
 
     def __call__(self):
         self.authenticate()
+
+        if self.pack:
+            self.pack_database()
+
         plone_sites = self.get_plone_sites()
-        if self.profile != '':
-            for site in plone_sites:
-                self.run_profile(site)
-        else:
-#             self.pack_database()
-            for site in plone_sites:
+
+        for site in plone_sites:
+            if self.update or (not self.pack and self.profile == ''):
                 self.remove_invalid_imports(site)
                 self.upgrade_plone(site)
                 self.upgrade_products(site)
+            if self.profile != '':
+                self.run_profile(site)
         transaction.commit()
 
 if __name__ == '__main__' and "app" in locals():
-    parser = OptionParser()
-    parser.add_option("-u", "--admin-user",
-                      dest="admin_user", default="admin")
-    parser.add_option("-c", dest="path")
-    parser.add_option("-p", "--profile", dest="profile", default="")
+    parser = ArgumentParser()
+    parser.add_argument("-a", "--admin-user",
+                        dest="user", default="admin")
+    parser.add_argument("-c", dest="path")
+    parser.add_argument("-p", "--profile", dest="profile", default="")
+    parser.add_argument("-u", "--update", dest="update", action='store_true')
+    parser.add_argument("-z", "--pack", dest="pack", action='store_true')
 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
 
     Updater = PloneUpdater(options, app)
     Updater()

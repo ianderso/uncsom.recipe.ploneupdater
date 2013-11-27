@@ -9,26 +9,33 @@ from sys import platform
 
 template = """#!%(executable)s
 import subprocess
-from optparse import OptionParser
+from argparse import ArgumentParser
 
-parser = OptionParser()
-parser.add_option("-u", "--admin-user",
-                  dest="admin_user", default="%(admin-user)s")
-parser.add_option("-p", "--profile",
-                  dest="profile", default='')
+parser = ArgumentParser()
+parser.add_argument("-a", "--admin-user", dest="admin_user",
+                    default="%(admin-user)s")
+parser.add_argument("-p", "--profile", dest="profile", default='')
+parser.add_argument("-u", "--update", dest="update", action='store_true')
+parser.add_argument("-z", "--pack", dest="pack", action='store_true')
 
-(options, args) = parser.parse_args()
+options = parser.parse_args()
 
 args = "--admin-user " + options.admin_user
 
 if options.profile != '':
     args += " --profile " + options.profile
 
+if options.update:
+    args += " --update " + options.update
+
+if options.pack:
+    args += " --pack " + options.pack
+
 %(zeo-start)s
 
 zopestatus = False
-
-if "program running" in subprocess.check_output(["%(instance-script)s", "status"]):
+if "program running" in subprocess.check_output(["%(instance-script)s",
+                                                 "status"]):
     cmd = "%(instance-script)s stop"
     subprocess.call(cmd.split())
     zopestatus = True

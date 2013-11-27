@@ -26,10 +26,10 @@ if options.profile != '':
     args += " --profile " + options.profile
 
 if options.update:
-    args += " --update " + options.update
+    args += " --update"
 
 if options.pack:
-    args += " --pack " + options.pack
+    args += " --pack"
 
 %(zeo-start)s
 

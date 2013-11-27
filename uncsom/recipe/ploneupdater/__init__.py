@@ -26,12 +26,19 @@ if options.profile != '':
 
 %(zeo-start)s
 
+zopestatus = False
+
 if "program running" in subprocess.check_output(["%(instance-script)s", "status"]):
     cmd = "%(instance-script)s stop"
     subprocess.call(cmd.split())
+    zopestatus = True
 
 cmd = "%(instance-script)s run %(script)s " + args
 subprocess.call(cmd.split())
+
+if zopestatus:
+    cmd = "%(instance-script)s start"
+    subprocess.call(cmd.split())
 
 %(zeo-stop)s
 """

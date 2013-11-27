@@ -83,6 +83,7 @@ class PloneUpdater(object):
         transaction.commit()
 
     def run_profile(self, site):
+        setSite(self.app[site])
         ps = self.app[site].portal_setup
         self.log(site, "Running profile: " + self.profile)
         if not self.profile.startswith('profile-'):

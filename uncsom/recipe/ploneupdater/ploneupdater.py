@@ -98,7 +98,7 @@ class PloneUpdater(object):
             for site in plone_sites:
                 self.run_profile(site)
         else:
-            self.pack_database()
+#             self.pack_database()
             for site in plone_sites:
                 self.remove_invalid_imports(site)
                 self.upgrade_plone(site)

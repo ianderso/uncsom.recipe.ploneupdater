@@ -86,8 +86,9 @@ class Recipe(object):
 
         is_win = platform[:3].lower() == "win"
 
-        instance_script = buildout[self.options['zope_part']]['location']
-
+        instance = buildout[self.options['zope_part']]
+        instance_home = instance['location']
+        instance_script = self.options['bin_dir'] + basename(instance_home)
         if is_win:
             instance_script = "%s.exe" % instance_script
         self.options['instance-script'] = instance_script
@@ -100,7 +101,8 @@ class Recipe(object):
                 else:
                     zeo_script = "%s_service.exe" % self.options['zeo_part']
             else:
-                zeo_script = buildout[self.options['zeo_part']]['location']
+                zeo_home = buildout[self.options['zeo_part']]['location']
+                zeo_script = self.options['bin_dir'] + basename(zeo_home)
             self.options['zeo-script'] = zeo_script
             self.options['zeo-start'] = zeo_start_template % self.options
             self.options['zeo-stop'] = zeo_stop_template % self.options

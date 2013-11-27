@@ -16,7 +16,7 @@ long_description = (
     'Detailed Documentation\n'
     '**********************\n'
     + '\n' +
-    read('uncsom', 'recipe', 'ploneupdater', 'README.txt')
+    read('src', 'uncsom', 'recipe', 'ploneupdater', 'README.txt')
     + '\n' +
     'Contributors\n'
     '************\n'
@@ -27,9 +27,6 @@ long_description = (
     '**************\n'
     + '\n' +
     read('CHANGES.txt')
-    + '\n' +
-    'Download\n'
-    '********\n'
     )
 entry_point = 'uncsom.recipe.ploneupdater:Recipe'
 entry_points = {"zc.buildout": ["default = %s" % entry_point]}
@@ -41,18 +38,22 @@ setup(name='uncsom.recipe.ploneupdater',
       description="A buildout recipe to update plone sites",
       long_description=long_description,
       classifiers=[
-          "Environment :: Web Environment",
-          "Framework :: Plone",
-          "Operating System :: OS Independent",
-          "Programming Language :: Python",
-          "Programming Language :: Python :: 2.7",
-          "Topic :: Software Development :: Libraries :: Python Modules", ],
+          'Framework :: Buildout',
+          'Intended Audience :: Developers',
+          'Intended Audience :: System Administrators',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 2.6',
+          'Programming Language :: Python :: 2.7',
+          'Topic :: Software Development :: Build Tools',
+          'Topic :: Software Development :: Libraries :: Python Modules',
+          'License :: OSI Approved :: GNU General Public License (GPL)',],
       keywords='buildout recipe update plone',
       author='Ian Anderson',
       author_email='ianderso@med.unc.edu',
       url='https://github.com/ianderso/uncsom.recipe.ploneupdater',
       license='GPL',
-      packages=find_packages(exclude=['ez_setup']),
+      package_dir={'': 'src'},
+      packages=find_packages('src'),
       namespace_packages=['uncsom', 'uncsom.recipe'],
       include_package_data=True,
       zip_safe=False,

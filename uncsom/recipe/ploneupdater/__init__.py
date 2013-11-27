@@ -26,8 +26,9 @@ if options.profile != '':
 
 %(zeo-start)s
 
-cmd = "%(instance-script)s stop"
-subprocess.call(cmd.split())
+if "program running" in subprocess.check_output(["%(instance-script)s", "status"]):
+    cmd = "%(instance-script)s stop"
+    subprocess.call(cmd.split())
 
 cmd = "%(instance-script)s run %(script)s " + args
 subprocess.call(cmd.split())
@@ -35,11 +36,19 @@ subprocess.call(cmd.split())
 %(zeo-stop)s
 """
 
-zeo_start_template = """zeo_start = "%(zeo-script)s start"
-subprocess.call(zeo_start.split())"""
+zeo_start_template = """
+zeostatus = False
+if "program running" in subprocess.check_output(["bin/zeoserver", "status"]):
+    zeostatus = True
 
-zeo_stop_template = """zeo_stop = "%(zeo-script)s stop"
-subprocess.call(zeo_stop.split())"""
+if not zeostatus:
+    zeo_start = "%(zeo-script)s start"
+    subprocess.call(zeo_start.split())"""
+
+zeo_stop_template = """
+if not zeostatus:
+    zeo_stop = "%(zeo-script)s stop"
+    subprocess.call(zeo_stop.split())"""
 
 
 class Recipe(object):

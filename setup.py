@@ -26,7 +26,7 @@ long_description = (
     'Change history\n'
     '**************\n'
     + '\n' +
-    read('CHANGES.txt')
+    read('CHANGES.rst')
     )
 entry_point = 'uncsom.recipe.ploneupdater:Recipe'
 entry_points = {"zc.buildout": ["default = %s" % entry_point]}

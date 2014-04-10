@@ -13,6 +13,7 @@ plone sites. It automatizes the following tasks:
  * run Plone migration (portal_migration.upgrade)
  * clean up invalid GS steps
  * run GS profile
+ * install product
 
 uncsom.recipe.ploneupdater will create an updater tool in the buildout bin
 directory.

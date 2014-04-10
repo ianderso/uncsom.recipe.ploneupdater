@@ -17,6 +17,7 @@ class PloneUpdater(object):
         self.profile = options.profile
         self.update = options.update
         self.pack = options.pack
+        self.install = options.install
         self.app = app
 
     def log(self, site, msg):
@@ -26,9 +27,14 @@ class PloneUpdater(object):
         """wrap the request in admin security context
         """
         admin = self.app.acl_users.getUserById(self.admin_user)
+        if admin is None:
+            self.log("", "admin user {admin} not found".format(
+                admin=self.admin_user))
+            return False
         admin = admin.__of__(self.app.acl_users)
         newSecurityManager(None, admin)
         self.app = makerequest.makerequest(self.app)
+        return True
 
     def pack_database(self):
         self.log('', "Packing Database")
@@ -90,8 +96,23 @@ class PloneUpdater(object):
         ps.runAllImportStepsFromProfile(self.profile)
         transaction.commit()
 
+    def install_product(self, site):
+        setSite(self.app[site])
+        qi = self.app[site].portal_quickinstaller
+        products = [p['id'] for p in qi.listInstallableProducts()]
+
+        if self.install in products:
+            self.log(site, "Installing Product: {product}".format(
+                product=self.install))
+            qi.installProducts(products=[self.install])
+        else:
+            self.log(site, "Product {product} unavailable for install".format(
+                product=self.install))
+
+
     def __call__(self):
-        self.authenticate()
+        if not self.authenticate():
+            return
 
         if self.pack:
             self.pack_database()
@@ -99,12 +120,15 @@ class PloneUpdater(object):
         plone_sites = self.get_plone_sites()
 
         for site in plone_sites:
-            if self.update or (not self.pack and self.profile == ''):
+            if self.update or (not self.pack and self.profile == ''
+                               and self.install == ''):
                 self.remove_invalid_imports(site)
                 self.upgrade_plone(site)
                 self.upgrade_products(site)
             if self.profile != '':
                 self.run_profile(site)
+            if self.install != '':
+                self.install_product(site)
         transaction.commit()
 
 if __name__ == '__main__' and "app" in locals():
@@ -115,6 +139,7 @@ if __name__ == '__main__' and "app" in locals():
     parser.add_argument("-p", "--profile", dest="profile", default="")
     parser.add_argument("-u", "--update", dest="update", action='store_true')
     parser.add_argument("-z", "--pack", dest="pack", action='store_true')
+    parser.add_argument("-i", "--install", dest="install", default='')
 
     options = parser.parse_args()
 

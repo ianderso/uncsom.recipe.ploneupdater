@@ -17,6 +17,7 @@ parser.add_argument("-a", "--admin-user", dest="admin_user",
 parser.add_argument("-p", "--profile", dest="profile", default='')
 parser.add_argument("-u", "--update", dest="update", action='store_true')
 parser.add_argument("-z", "--pack", dest="pack", action='store_true')
+parser.add_argument("-i", "--install", dest="install", default='')
 
 options = parser.parse_args()
 
@@ -30,6 +31,10 @@ if options.update:
 
 if options.pack:
     args += " --pack"
+
+if options.install != '':
+    args += " --install " + options.install
+
 
 %(zeo-start)s
 

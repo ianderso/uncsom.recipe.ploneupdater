@@ -27,7 +27,7 @@ long_description = (
     '**************\n'
     + '\n' +
     read('CHANGES.rst')
-    )
+)
 entry_point = 'uncsom.recipe.ploneupdater:Recipe'
 entry_points = {"zc.buildout": ["default = %s" % entry_point]}
 
@@ -46,7 +46,7 @@ setup(name='uncsom.recipe.ploneupdater',
           'Programming Language :: Python :: 2.7',
           'Topic :: Software Development :: Build Tools',
           'Topic :: Software Development :: Libraries :: Python Modules',
-          'License :: OSI Approved :: GNU General Public License (GPL)',],
+          'License :: OSI Approved :: GNU General Public License (GPL)'],
       keywords='buildout recipe update plone',
       author='Ian Anderson',
       author_email='ianderso@med.unc.edu',

@@ -87,44 +87,52 @@ class Recipe(object):
 
         self.options['script'] = pathjoin(dirname(__file__), 'ploneupdater.py')
 
+        self.find_zeo_part()
+        self.find_zope_part()
+
+        self.is_win = platform[:3].lower() == "win"
+
+        self.set_instance_scipt()
+        if self.options['zeo_part']:
+            self.set_zeo_scipt()
+
+    def find_zeo_part(self):
         zeo_recipes = ('plone.recipe.zeoserver', 'plone.recipe.zope2zeoserver')
-
-        zope_recipes = ('plone.recipe.zope2instance')
-
         for id in self.buildout.keys():
             recipe = self.buildout[id].get('recipe', None)
             if recipe and recipe in zeo_recipes:
                 self.options['zeo_part'] = id
                 break
 
+    def find_zope_part(self):
+        zope_recipes = ('plone.recipe.zope2instance')
         for id in self.buildout.keys():
             recipe = self.buildout[id].get('recipe', None)
             if recipe and recipe in zope_recipes:
                 self.options['zope_part'] = id
                 break
 
-        is_win = platform[:3].lower() == "win"
-
-        instance = buildout[self.options['zope_part']]
+    def set_instance_scipt(self):
+        instance = self.buildout[self.options['zope_part']]
         instance_home = instance['location']
         instance_script = self.options['bin_dir'] + '/' + basename(instance_home)
-        if is_win:
+        if self.is_win:
             instance_script = "%s.exe" % instance_script
         self.options['instance-script'] = instance_script
 
-        if self.options['zeo_part']:
-            if is_win:
-                if pathexists(pathjoin(self.options['bin-directory'],
-                              'zeoservice.exe')):
-                    zeo_script = 'zeoservice.exe'
-                else:
-                    zeo_script = "%s_service.exe" % self.options['zeo_part']
+    def set_zeo_scipt(self):
+        if self.is_win:
+            if pathexists(pathjoin(self.options['bin-directory'],
+                          'zeoservice.exe')):
+                zeo_script = 'zeoservice.exe'
             else:
-                zeo_home = buildout[self.options['zeo_part']]['location']
-                zeo_script = self.options['bin_dir'] + '/' + basename(zeo_home)
-            self.options['zeo-script'] = zeo_script
-            self.options['zeo-start'] = zeo_start_template % self.options
-            self.options['zeo-stop'] = zeo_stop_template % self.options
+                zeo_script = "%s_service.exe" % self.options['zeo_part']
+        else:
+            zeo_home = self.buildout[self.options['zeo_part']]['location']
+            zeo_script = self.options['bin_dir'] + '/' + basename(zeo_home)
+        self.options['zeo-script'] = zeo_script
+        self.options['zeo-start'] = zeo_start_template % self.options
+        self.options['zeo-stop'] = zeo_stop_template % self.options
 
     def install(self):
         script_path = pathjoin(self.options['bin-directory'], self.name)

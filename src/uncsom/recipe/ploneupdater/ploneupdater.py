@@ -109,7 +109,6 @@ class PloneUpdater(object):
             self.log(site, "Product {product} unavailable for install".format(
                 product=self.install))
 
-
     def __call__(self):
         if not self.authenticate():
             return

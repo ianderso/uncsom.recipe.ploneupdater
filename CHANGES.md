@@ -35,3 +35,8 @@
 ==================
 
   - call setSite before running profile
+
+1.5 (2014-04-10)
+================
+
+  - Added new featue to install arbitrary product

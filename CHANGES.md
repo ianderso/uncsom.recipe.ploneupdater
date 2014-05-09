@@ -40,3 +40,8 @@
 ================
 
   - Added new featue to install arbitrary product
+
+1.6 (2014-05-09)
+================
+
+  - Now all Zope clients are discovered, and restarted based upon initial state
